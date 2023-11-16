@@ -1,0 +1,50 @@
+/* Apply base styles from Tailwind CSS */
+@import 'tailwindcss/base';
+
+/* Apply component styles from Tailwind CSS */
+@import 'tailwindcss/components';
+
+/* Apply utility styles from Tailwind CSS */
+@import 'tailwindcss/utilities';
+
+/* Add custom styles for the rule30Canvas */
+#rule30Canvas {
+    border: 1px solid black;
+}
+
+/* Customize the appearance of buttons */
+button {
+    background-color: #3490dc;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+/* Style the input fields */
+input[type="number"] {
+    border: 1px solid #ccc;
+    padding: 6px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+/* Style the labels */
+label {
+    margin-top: 12px;
+    display: block;
+}
+
+/* Style the ruleDescription paragraph */
+#ruleDescription {
+    margin-top: 16px;
+}
+
+/* Style the canvas container */
+#rule30Canvas {
+    border: 1px solid black;
+    width: 100%;
+    max-width: 90%; /* Adjust the max width as needed */
+    max-height: 80vh; /* Ensure the canvas height never exceeds the screen height */
+}
