@@ -5,23 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rule 30 Simulation</title>
     <!-- Add Tailwind CSS CDN -->
-    <link rel="stylesheet" href="output.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-blue-50">
-    <div class="flex flex-col md:flex-row items-center space-y-2 md:space-x-4">
-        <!-- Title and Webpage Links -->
-        <div class="w-full max-w-screen-xl text-center p-4">
-            <h1 class="text-3xl font-semibold mb-2">Cellular Automata</h1>
-            <div class="text-blue-500">
-                <!-- Add your webpage links here if needed -->
+            <!-- Title and Webpage Links -->
+            <div class="w-full text-center p-4">
+                <!-- <div class="w-full max-w-screen-xl text-center p-4"> -->
+                <h1 class="text-4xl font-semibold mb-2">Cellular Automata</h1>
+                <div class="text-blue-500">
+                    <!-- Add your webpage links here if needed -->
+                </div>
             </div>
-        </div>
+    <div class="flex flex-col md:flex-row items-center space-y-2 md:space-x-4">
+
         
         <!-- Canvas on the Left -->
-        <div class="md:w-1/2 w-full h-screen flex justify-center items-center">
-            <canvas id="rule30Canvas" class="border border-gray-500"></canvas>
-            <p id="ruleDescription" class="mt-4"></p>
+        <div class="md:w-1/2 w-full md:h-screen h-auto flex justify-center items-center mb-4"> <!-- h-auto for smaller screens, md:h-screen for medium and up -->
+            <canvas id="rule30Canvas" class="border border-black w-full max-w-6xl max-h-screen"></canvas>
         </div>
+
+        <!-- Description -->
+        <p id="ruleDescription" class="mt-4 mb-4 text-center">Your description here</p> <!-- Added margin-top and margin-bottom -->
+
+        <!-- Content beside the description -->
+        <div class="mt-4">
+            <!-- Other content or elements go here -->
+        </div>
+
+
 
         <!-- Controls on the Right -->
         <div class="md:w-1/2 w-full p-4">
@@ -32,11 +43,10 @@
             <input type="number" id="customGenerations" value="50" min="1" class="border border-gray-400 px-2 py-1 rounded-md mb-2">
             <label for="customCellSize">Cell Size (pixels):</label>
             <input type="number" id="customCellSize" value="5" min="1" class="border border-gray-400 px-2 py-1 rounded-md mb-2">
-
             <input type="number" id="ruleInput1" min="0" max="255" step="1" value="30" placeholder="Enter Rule Number" class="border border-gray-400 px-2 py-1 rounded-md mb-2">
             <input type="number" id="ruleInput2" min="0" max="255" step="1" value="86" placeholder="Enter Rule Number" class="border border-gray-400 px-2 py-1 rounded-md mb-2">
             <button id="compareRulesBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md mb-2">Compare Rules</button>
-            <label for="flipRule">Flip Rule (0: None, 1: Rule 1, 2: Rule 2):</label>
+            <label for="flipRule">Flip Rule (0: None, 1: Rule 1, 2: Rule 2). Green = same, Red = different</label>
             <input type="number" id="flipRule" min="0" max="2" step="1" value="0" class="border border-gray-400 px-2 py-1 rounded-md mb-2">
             <button id="exportBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md mb-2">Export as PNG</button>
         </div>

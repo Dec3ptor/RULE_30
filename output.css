@@ -575,6 +575,7 @@ label {
 
 #ruleDescription {
   margin-top: 16px;
+  text-align: center;
 }
 
 /* Style the canvas container */

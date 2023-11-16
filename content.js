@@ -1,7 +1,7 @@
 // npx tailwindcss -i ./input.css -o ./output.css --watch
 // node server.js
 const generations = 50;  // Number of generations to simulate
-const cellSize = 5;  // Size of each cell in pixels
+const cellSize = 10;  // Size of each cell in pixels
 const size = 2 * generations + 1;  // Size of the grid based on generations
 
 const canvas = document.getElementById('rule30Canvas');
@@ -13,54 +13,46 @@ canvas.height = generations * cellSize;
 let cells = Array(size).fill(0);
 cells[Math.floor(size / 2)] = 1;
 
-async function saveGenerations(generationsData) {
-    try {
-        console.log("Saving generations data:", generationsData);
-        const response = await fetch('http://localhost:3000/api/save', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(generationsData),
-        });
+// async function saveGenerations(generationsData) {
+//     try {
+//         console.log("Saving generations data:", generationsData);
+//         const response = await fetch('http://localhost:3000/api/save', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify(generationsData),
+//         });
 
-        if (response.ok) {
-            console.log("Generations data saved successfully.");
-        } else {
-            console.error("Failed to save generations data. Response status:", response.status);
-        }
-    } catch (error) {
-        console.error("Error saving generations data:", error);
-    }
-}
+//         if (response.ok) {
+//             console.log("Generations data saved successfully.");
+//         } else {
+//             console.error("Failed to save generations data. Response status:", response.status);
+//         }
+//     } catch (error) {
+//         console.error("Error saving generations data:", error);
+//     }
+// }
 
-async function loadGenerations(identifier, genCount) {
-    try {
-        const url = `http://localhost:3000/api/load/${identifier}?genCount=${genCount}`;
-        const response = await fetch(url);
+// async function loadGenerations(identifier, genCount) {
+//     try {
+//         const url = `http://localhost:3000/api/load/${identifier}?genCount=${genCount}`;
+//         const response = await fetch(url);
 
-        if (response.ok) {
-            const generationsData = await response.json();
-            console.log("Generations data loaded successfully for:", identifier);
-            return generationsData;
-        } else {
-            console.error("Failed to load generations data for:", identifier, "Response status:", response.status);
-            return null;
-        }
-    } catch (error) {
-        console.error("Error loading generations data for:", identifier, error);
-        return null;
-    }
-}
+//         if (response.ok) {
+//             const generationsData = await response.json();
+//             console.log("Generations data loaded successfully for:", identifier);
+//             return generationsData;
+//         } else {
+//             console.error("Failed to load generations data for:", identifier, "Response status:", response.status);
+//             return null;
+//         }
+//     } catch (error) {
+//         console.error("Error loading generations data for:", identifier, error);
+//         return null;
+//     }
+// }
 
-
-
-
-
-for (let gen = 0; gen < generations - 1; gen++) {
-    drawGeneration(cells, gen, cellSize);  // Pass cellSize as an argument
-    cells = generateNext(cells, 30);  // Pass a default rule number, e.g., 30 for Rule 30
-}
 
 // Modify the drawGeneration and generateNext functions to use custom cell size
 function drawGeneration(cells, gen, cellSize, canvasWidth, flip=false) {
@@ -139,6 +131,20 @@ document.getElementById('customGenerations').addEventListener('change', function
 document.getElementById('customCellSize').addEventListener('change', function() {
     applySelectedRule();
 });
+document.getElementById('flipRule').addEventListener('change', function() {
+    let rule1Binary = getBinaryRule(document.getElementById('ruleInput1').value);
+    let rule2Binary = getBinaryRule(document.getElementById('ruleInput2').value);
+    
+    if (!rule1Binary || !rule2Binary) {
+        alert("Please enter valid rule numbers or binary strings in both inputs.");
+        return;
+    }
+    
+    // Now, perform the comparison
+    drawAndCompareRules(rule1Binary, rule2Binary);
+});
+
+
 
 async function applySelectedRule() {
     const ruleInput = document.getElementById('ruleInput').value;
@@ -157,7 +163,7 @@ async function applySelectedRule() {
         const size = 2 * customGenerations + 5;
 
         // Setup canvas
-        canvas.width = size * customCellSize;
+        canvas.width = (size - 4) * customCellSize;
         canvas.height = (customGenerations + 1) * customCellSize;
 
         // Construct the identifier for loading
@@ -185,10 +191,29 @@ async function applySelectedRule() {
         // }
 
         // Draw all generations
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
         generations.forEach((genCells, gen) => {
             drawGeneration(genCells, gen, customCellSize, canvas.width);
         });
+        
+
+        // // Draw only the center column of all generations
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // // Assuming that 'drawGeneration' function draws a full row,
+        // // modify the call to draw only the center cell.
+        // generations.forEach((genCells, gen) => {
+        //     // Calculate the position of the center cell
+        //     const centerCellIndex = Math.floor(size / 2);
+
+        //     // Create a new array with only the center cell
+        //     const centerCellArray = [genCells[centerCellIndex]];
+
+        //     // Draw the center cell - you may need to adjust this call
+        //     // depending on how your 'drawGeneration' function is implemented
+        //     drawGeneration(centerCellArray, gen, customCellSize, canvas.width);
+        // });
+
 
         // if (shouldSave) {
         //     // Determine the generation count for naming the file appropriately
@@ -291,16 +316,37 @@ function drawRule(binaryRule, flip) {
         canvas.width = size * customCellSize;
         canvas.height = (customGenerations + 1) * customCellSize;
 
-        let cells = Array(size).fill(0);
-        cells[Math.floor(size / 2)] = 1;
 
+        let generations = []; // Array to store all generations
+        // let shouldSave = false; // Flag to determine if we need to save after generation
+
+        // if (savedData && savedData.rule === binaryRule) {
+        //     generations = savedData.generations; // Use saved generations
+        //     console.log("Using saved rule from server: " + ruleNumber);
+        // } else {
+            let cells = new Array(size).fill(0);
+            cells[Math.floor(size / 2)] = 1;
+            generations.push(cells); // Add the initial generation
+
+            for (let gen = 1; gen <= customGenerations; gen++) {
+                cells = generateNext(cells, binaryRule);
+                generations.push(cells); // Accumulate each generation
+            }
+            // shouldSave = true; // New data generated, so save is needed
+        // }
+
+        // Draw all generations
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        generations.forEach((genCells, gen) => {
+            drawGeneration(genCells, gen, customCellSize, canvas.width, flip);
+        });
         // Clear the canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Generate and draw the pattern based on the new rule
-        for (let gen = 0; gen < generations + 1; gen++) {
-            drawGeneration(cells, gen, customCellSize, flip);  // Pass the flip argument
-            cells = generateNext(cells, binaryRule);
-        }
+        // for (let gen = 0; gen < generations + 1; gen++) {
+        //     drawGeneration(cells, gen, customCellSize, flip);  // Pass the flip argument
+        //     cells = generateNext(cells, binaryRule);
+        // }
     }
-
+    applySelectedRule();
