@@ -109,7 +109,7 @@
           <li><span class="swatch" style="background:#2f6fde"></span>1 grain</li>
           <li><span class="swatch" style="background:#f2b33d"></span>2 grains</li>
           <li><span class="swatch" style="background:#c8364a"></span>3 grains</li>
-          <li><span class="swatch" style="background:color-mix(in srgb, var(--cell-fg) 20%, var(--cell-bg))"></span>4 or more (still toppling)</li>
+          <li><span class="swatch" style="background:var(--cell-busy)"></span>4 or more (still toppling)</li>
         </ul>
         <p class="small muted">Turn on Draw and tap to drop 2,000 more grains. Sand that falls off the edge is lost.</p>`;
     },

@@ -21,6 +21,8 @@
   const DEFAULT_SPEED = 5;
   const FRAME_BUDGET_MS = 12;
   const finePointer = window.matchMedia('(pointer: fine)').matches;
+  // Matches the CSS rule that pins the canvas to the top of the screen on upright phones.
+  const PINNED = window.matchMedia('(max-width: 900px) and (orientation: portrait) and (min-height: 560px)');
 
   const state = { algo: null, params: {}, cell: 3, speed: DEFAULT_SPEED, running: false, drawing: finePointer };
   let sim = null, cols = 0, rows = 0, imageData = null, buf32 = null, theme = null;
@@ -193,7 +195,12 @@
     const algo = state.algo;
     const narrow = w < 640;
     const aspect = narrow ? (algo.group === '2D' ? 1 : 0.62) : algo.aspect;
-    const maxH = Math.max(260, Math.round(window.innerHeight * 0.72));
+    // A pinned canvas gets about half the screen so the settings below stay visible.
+    // On a short (landscape) screen, leave room for the slim header and the buttons.
+    const vh = window.innerHeight;
+    const maxH = PINNED.matches ? Math.max(200, Math.round(vh * 0.5))
+      : vh < 500 ? Math.max(180, vh - 156)
+      : Math.max(260, Math.round(vh * 0.72));
     const h = Math.min(Math.round(w * aspect), maxH);
     const cell = state.cell;
     cols = Math.max(9, Math.floor(w / cell));
@@ -283,7 +290,7 @@
     for (const b of els.nav.querySelectorAll('[data-algo]')) {
       const on = b.dataset.algo === algo.id;
       b.setAttribute('aria-pressed', String(on));
-      if (on && b.scrollIntoView && !fromHash) b.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      if (on) revealChip(b, !fromHash);
     }
     els.name.textContent = algo.name;
     els.tagline.textContent = algo.tagline;
@@ -301,6 +308,22 @@
     writeHash();
     document.title = `${algo.name} · Cellular Automata`;
   }
+
+  // Scroll the algorithm strip sideways (never the page) so the chosen chip is visible.
+  function revealChip(chip, smooth) {
+    const nr = els.nav.getBoundingClientRect(), cr = chip.getBoundingClientRect();
+    if (cr.left < nr.left + 8 || cr.right > nr.right - 40) {
+      els.nav.scrollBy({ left: cr.left - nr.left - (nr.width - cr.width) / 2, behavior: smooth ? 'smooth' : 'auto' });
+    }
+    updateNavFade();
+  }
+
+  function updateNavFade() {
+    const n = els.nav;
+    n.classList.toggle('more-right', n.scrollLeft + n.clientWidth < n.scrollWidth - 2);
+  }
+  els.nav.addEventListener('scroll', updateNavFade, { passive: true });
+  window.addEventListener('resize', updateNavFade);
 
   function renderInfo() {
     els.info.innerHTML = state.algo.info ? state.algo.info(state.params) : '';
@@ -379,7 +402,11 @@
     updateStatus();
   });
   els.reset.addEventListener('click', () => reset());
-  els.draw.addEventListener('click', () => setDrawing(!state.drawing));
+  els.draw.addEventListener('click', () => {
+    setDrawing(!state.drawing);
+    // On touch screens, dragging the canvas either draws or scrolls, so say which.
+    if (!finePointer) toast(state.drawing ? 'Drawing on: drag on the canvas' : 'Drawing off');
+  });
 
   els.speed.addEventListener('input', () => {
     state.speed = +els.speed.value;
@@ -395,6 +422,27 @@
     writeHash();
   });
 
+  // Phones get the system share sheet (save to Photos, send in a message...).
+  const useShareSheet = !finePointer && typeof navigator.share === 'function';
+
+  function pngBlob(c) {
+    // Built synchronously so navigator.share still counts as part of the tap (Safari requires it).
+    const bin = atob(c.toDataURL('image/png').split(',')[1]);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: 'image/png' });
+  }
+
+  function download(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
   els.exportBtn.addEventListener('click', () => {
     // Scale up so the saved image isn't tiny, keeping cells sharp.
     const scale = Math.max(state.cell, Math.min(12, Math.ceil(1600 / cols)));
@@ -404,24 +452,36 @@
     const g = out.getContext('2d');
     g.imageSmoothingEnabled = false;
     g.drawImage(canvas, 0, 0, out.width, out.height);
-    out.toBlob((blob) => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `${state.algo.id}-${sim.label || 'pattern'}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-    }, 'image/png');
+    const name = `${state.algo.id}-${sim.label || 'pattern'}.png`;
+    const blob = pngBlob(out);
+    if (useShareSheet && navigator.canShare) {
+      const file = new File([blob], name, { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: document.title }).catch((err) => {
+          if (err.name !== 'AbortError') download(blob, name);
+        });
+        return;
+      }
+    }
+    download(blob, name);
   });
 
   els.share.addEventListener('click', async () => {
     writeHashNow();
+    const url = location.href;
+    if (useShareSheet) {
+      try {
+        await navigator.share({ title: document.title, url });
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
     try {
-      await navigator.clipboard.writeText(location.href);
+      await navigator.clipboard.writeText(url);
       toast('Link copied');
     } catch {
-      window.prompt('Copy this link:', location.href);
+      window.prompt('Copy this link:', url);
     }
   });
 
@@ -466,7 +526,7 @@
   }
 
   canvas.addEventListener('pointerdown', (e) => {
-    if (!state.drawing || !state.algo.paintable || !sim.paint) return;
+    if (!e.isPrimary || !state.drawing || !state.algo.paintable || !sim.paint) return;
     e.preventDefault();
     canvas.setPointerCapture(e.pointerId);
     const c = cellAt(e);
@@ -477,7 +537,7 @@
     dirty = true;
   });
   canvas.addEventListener('pointermove', (e) => {
-    if (!painting || sim.paintOnce) return;
+    if (!painting || !e.isPrimary || sim.paintOnce) return;
     const c = cellAt(e);
     if (c[0] === lastCell[0] && c[1] === lastCell[1]) return;
     paintLine(lastCell, c);
@@ -512,12 +572,31 @@
     dice: svg('<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/>'),
   };
 
+  // ---- Phones: pinned canvas -------------------------------------------------------------
+  // Unpin while a text field has focus so the canvas can't cover it or the keyboard.
+  const isTextField = (el) => el && el.matches && el.matches('input[type="text"]');
+  document.addEventListener('focusin', (e) => { if (isTextField(e.target)) document.body.classList.add('typing'); });
+  document.addEventListener('focusout', (e) => { if (isTextField(e.target)) document.body.classList.remove('typing'); });
+
+  // Add a shadow under the pinned canvas once it is actually stuck to the top.
+  if ('IntersectionObserver' in window) {
+    const stageTop = $('#stageTop');
+    new IntersectionObserver(([entry]) => {
+      stageTop.classList.toggle('stuck', !entry.isIntersecting && entry.boundingClientRect.top < 0);
+    }).observe($('#stickSentinel'));
+  }
+
   // ---- Start ----------------------------------------------------------------------------
   els.step.innerHTML = `${ICON.step}<span>Step</span>`;
   els.reset.innerHTML = `${ICON.reset}<span>Reset</span>`;
   els.draw.innerHTML = `${ICON.draw}<span>Draw</span>`;
   els.exportBtn.innerHTML = `${ICON.save}<span>PNG</span>`;
   els.share.innerHTML = `${ICON.link}<span>Link</span>`;
+  if (useShareSheet) {
+    els.share.title = 'Share a link to this pattern';
+    els.share.setAttribute('aria-label', 'Share link');
+    els.exportBtn.title = 'Save or share as PNG';
+  }
   els.speed.max = SPEEDS.length - 1;
   els.speed.value = state.speed;
 

@@ -12,6 +12,7 @@
   --danger: #d93a3a;
   --cell-bg: #ffffff;
   --cell-fg: #111318;
+  --cell-busy: #cfd0d1;
   --radius: 12px;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   color-scheme: light;
@@ -32,11 +33,18 @@
     --danger: #ff6b6b;
     --cell-bg: #0b0d11;
     --cell-fg: #e9edf3;
+    --cell-busy: #39393c;
     color-scheme: dark;
   }
 }
 
 * { box-sizing: border-box; }
+
+/* No double-tap zoom or grey tap flash on controls (phones). */
+button, select, input, label, .chip {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
 
 html { -webkit-text-size-adjust: 100%; }
 
@@ -105,7 +113,9 @@ a { color: var(--accent); }
   border-radius: 999px;
   background: var(--surface);
 }
-.gh-link:hover { border-color: var(--accent); }
+@media (hover: hover) {
+  .gh-link:hover { border-color: var(--accent); }
+}
 
 /* ---- Algorithm picker ---- */
 .algo-nav {
@@ -115,6 +125,10 @@ a { color: var(--accent); }
   padding-top: 14px;
   padding-bottom: 14px;
   scrollbar-width: thin;
+}
+.algo-nav.more-right {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
 }
 
 .nav-group {
@@ -144,7 +158,9 @@ a { color: var(--accent); }
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
-.chip:hover { border-color: var(--line-strong); color: var(--ink); }
+@media (hover: hover) {
+  .chip:hover { border-color: var(--line-strong); color: var(--ink); }
+}
 .chip[aria-pressed="true"] {
   background: var(--accent);
   border-color: var(--accent);
@@ -174,6 +190,9 @@ canvas {
   display: block;
   image-rendering: crisp-edges;
   image-rendering: pixelated;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 canvas.drawing {
   cursor: crosshair;
@@ -184,6 +203,8 @@ canvas.drawing {
 .toolbar {
   display: flex;
   flex-wrap: wrap;
+  -webkit-user-select: none;
+  user-select: none;
   align-items: center;
   gap: 8px;
   margin-top: 12px;
@@ -207,7 +228,9 @@ canvas.drawing {
   cursor: pointer;
   transition: background-color 0.15s, border-color 0.15s;
 }
-.btn:hover { border-color: var(--line-strong); }
+@media (hover: hover) {
+  .btn:hover { border-color: var(--line-strong); }
+}
 .btn:active { transform: translateY(1px); }
 .btn svg { width: 17px; height: 17px; flex: none; }
 .btn.primary {
@@ -302,7 +325,7 @@ input[type="range"] {
   height: 38px;
   padding: 0 10px;
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--ink);
   background: var(--bg);
   border: 1px solid var(--line);
@@ -430,7 +453,7 @@ kbd {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   transform: translate(-50%, 12px);
   background: var(--ink);
   color: var(--bg);
@@ -446,8 +469,29 @@ kbd {
 
 /* ---- Small screens ---- */
 @media (max-width: 900px) {
-  .layout { grid-template-columns: minmax(0, 1fr); }
-  .panel { position: static; }
+  .layout { display: block; }
+  .panel { position: static; margin-top: 18px; }
+}
+
+/* Phones and tablets held upright: keep the canvas and its buttons pinned to the
+   top while scrolling through the settings, so changes are visible straight away. */
+@media (max-width: 900px) and (orientation: portrait) and (min-height: 560px) {
+  .stage { display: contents; }
+  .stick-sentinel { height: 1px; margin-bottom: -1px; }
+  .stage-top {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    margin-top: -8px;
+    padding: 8px 0 10px;
+    background: var(--bg);
+    transition: box-shadow 0.2s;
+  }
+  .stage-top .toolbar { margin-top: 10px; }
+  .stage-top.stuck { box-shadow: 0 12px 14px -14px rgba(0, 0, 0, 0.5); }
+  /* While typing, let it scroll away so it can't cover the field or keyboard. */
+  body.typing .stage-top { position: relative; }
+  .sliders { margin-top: 4px; }
 }
 
 @media (max-width: 560px) {
@@ -467,6 +511,15 @@ kbd {
   .btn.compact { width: 40px; padding: 0; }
   .sliders { gap: 4px 16px; }
   .about { margin-top: 28px; }
+}
+
+/* Phones on their side: slim header so the canvas and its buttons fit on one screen. */
+@media (max-height: 500px) {
+  .site-header { padding-top: 8px; }
+  .subtitle { display: none; }
+  .title { font-size: 18px; }
+  .logo { width: 34px; }
+  .algo-nav { padding-top: 8px; padding-bottom: 8px; }
 }
 
 @media (max-width: 380px) {

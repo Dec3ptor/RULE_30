@@ -21,6 +21,8 @@ Interactive cellular automata that run entirely in the browser: no server, no bu
 
 Every view has play/pause, single-step, speed and cell-size controls, PNG export, and a **Link** button that copies a URL with the current settings. On 2D views, turn on **Draw** to edit the grid.
 
+It works on phones and tablets too: the canvas stays pinned at the top while you scroll through the settings, you can draw with a finger, and PNG/Link open the phone's share sheet (so you can save straight to Photos).
+
 ## Running locally
 
 Open `index.html` in a browser. That's it.

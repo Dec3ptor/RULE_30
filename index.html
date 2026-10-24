@@ -27,19 +27,22 @@
   </header>
 
   <main class="wrap layout">
-    <section class="stage" aria-label="Simulation">
-      <div class="canvas-box" id="canvasBox">
-        <canvas id="canvas" aria-label="Cellular automaton"></canvas>
-      </div>
+    <div class="stage" role="region" aria-label="Simulation">
+      <div class="stick-sentinel" id="stickSentinel" aria-hidden="true"></div>
+      <div class="stage-top" id="stageTop">
+        <div class="canvas-box" id="canvasBox">
+          <canvas id="canvas" aria-label="Cellular automaton"></canvas>
+        </div>
 
-      <div class="toolbar">
-        <button type="button" id="playBtn" class="btn primary"></button>
-        <button type="button" id="stepBtn" class="btn compact" title="Step" aria-label="Step"></button>
-        <button type="button" id="resetBtn" class="btn compact" title="Reset" aria-label="Reset"></button>
-        <button type="button" id="drawBtn" class="btn toggle" aria-pressed="false" title="Draw on the canvas" aria-label="Draw"></button>
-        <span class="spacer"></span>
-        <button type="button" id="exportBtn" class="btn ghost" title="Save as PNG" aria-label="Save as PNG"></button>
-        <button type="button" id="shareBtn" class="btn ghost" title="Copy a link to this pattern" aria-label="Copy link"></button>
+        <div class="toolbar">
+          <button type="button" id="playBtn" class="btn primary"></button>
+          <button type="button" id="stepBtn" class="btn compact" title="Step" aria-label="Step"></button>
+          <button type="button" id="resetBtn" class="btn compact" title="Reset" aria-label="Reset"></button>
+          <button type="button" id="drawBtn" class="btn toggle" aria-pressed="false" title="Draw on the canvas" aria-label="Draw"></button>
+          <span class="spacer"></span>
+          <button type="button" id="exportBtn" class="btn ghost" title="Save as PNG" aria-label="Save as PNG"></button>
+          <button type="button" id="shareBtn" class="btn ghost" title="Copy a link to this pattern" aria-label="Copy link"></button>
+        </div>
       </div>
 
       <div class="sliders">
@@ -54,7 +57,7 @@
       </div>
 
       <p class="status" id="status"></p>
-    </section>
+    </div>
 
     <aside class="panel" aria-labelledby="algoName">
       <h1 id="algoName" class="panel-title"></h1>
