@@ -8,7 +8,7 @@
   CA.register({
     id: 'forest',
     name: 'Forest fire',
-    group: '2D',
+    group: 'Nature',
     tagline: 'Trees grow, lightning strikes, and fire spreads to neighbouring trees.',
     aspect: 0.75,
     defaultCell: 3,

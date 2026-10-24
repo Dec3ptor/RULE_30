@@ -10,14 +10,22 @@ Interactive cellular automata that run entirely in the browser: no server, no bu
 - **Elementary**: all 256 rules (Rule 30, 90, 110, …). Type a number or an 8-bit binary rule. Shows the rule table, equivalent rules (mirror and complement) and Rule 30's centre column.
 - **Rule comparison**: runs two rules side by side and colours the cells where they differ, with an optional mirror for either rule.
 - **Totalistic (3 colours)**: Wolfram's 2,187 three-colour totalistic rules, e.g. code 1599.
+- **Traffic jams**: the Nagel–Schreckenberg traffic model; phantom jams form and drift backwards.
 
 **2D**
 - **Game of Life**: Conway's Life plus HighLife, Seeds, Day & Night, Maze and other B/S rules, and "Generations" rules like Brian's Brain and Star Wars. Includes the glider gun, R-pentomino and other starting patterns.
 - **Langton's ant**: the classic ant and multi-colour turmites (RLR, LLRR, …), with more than one ant if you like.
 - **Cyclic**: spiral-forming cyclic automata with adjustable range, threshold and neighbourhood.
+- **Wireworld**: electronic circuits with clocks, diodes and an OR gate; draw your own.
+
+**Nature**
+- **Snowflake**: Reiter's snow-crystal model and Packard's snowflake, on a hexagonal grid.
 - **Reaction–diffusion**: the Gray–Scott model (coral, mitosis, worms, spots, …).
+- **Hodgepodge (BZ reaction)**: spiral chemical waves from the Belousov–Zhabotinsky reaction model.
+- **Crystal growth (DLA)**: diffusion-limited aggregation grows branching fractals.
 - **Sandpile**: the Abelian sandpile and its fractal.
 - **Forest fire**: the Drossel–Schwabl model.
+- **Ising magnet**: the classic model of magnetism and its phase transition.
 
 Every view has play/pause, single-step, speed and cell-size controls, PNG export, and a **Link** button that copies a URL with the current settings. On 2D views, turn on **Draw** to edit the grid.
 

@@ -194,7 +194,7 @@
     lastWidth = w;
     const algo = state.algo;
     const narrow = w < 640;
-    const aspect = narrow ? (algo.group === '2D' ? 1 : 0.62) : algo.aspect;
+    const aspect = narrow ? (algo.group === '1D' ? 0.62 : 1) : algo.aspect;
     // A pinned canvas gets about half the screen so the settings below stay visible.
     // On a short (landscape) screen, leave room for the slim header and the buttons.
     const vh = window.innerHeight;
@@ -206,6 +206,7 @@
     cols = Math.max(9, Math.floor(w / cell));
     rows = Math.max(9, Math.floor(h / cell));
     if (algo.oddCols && cols % 2 === 0) cols--;
+    if (algo.evenGrid) { cols -= cols % 2; rows -= rows % 2; }
     canvas.width = cols;
     canvas.height = rows;
     canvas.style.width = `${cols * cell}px`;

@@ -20,7 +20,7 @@
   CA.register({
     id: 'reaction',
     name: 'Reaction–diffusion',
-    group: '2D',
+    group: 'Nature',
     tagline: 'Two virtual chemicals diffuse and react, growing coral, spots and stripes.',
     aspect: 0.75,
     defaultCell: 3,

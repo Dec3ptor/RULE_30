@@ -6,7 +6,7 @@
   CA.register({
     id: 'sandpile',
     name: 'Sandpile',
-    group: '2D',
+    group: 'Nature',
     tagline: 'Pile up sand grains; any cell with 4 or more topples onto its neighbours.',
     aspect: 0.75,
     defaultCell: 2,
